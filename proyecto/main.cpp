@@ -79,8 +79,8 @@ int main(int argc, char** argv)
 		dilate(bgmask,bgmask,20);
 		medianBlur(bgmask,bgmask,5);
 
-		//HandGesture hand;
-		//hand.FeaturesDetection(bgmask, frame);
+		HandGesture hand;
+		hand.FeaturesDetection(bgmask, frame);
 		// deteccion de las caracter�sticas de la mano
 
                 // mostramos el resultado de la sobstracci�n de fondo
