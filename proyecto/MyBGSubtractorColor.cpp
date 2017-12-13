@@ -18,19 +18,19 @@ MyBGSubtractorColor::MyBGSubtractorColor(VideoCapture vc) {
 
 	cap = vc;
 	max_samples = MAX_HORIZ_SAMPLES * MAX_VERT_SAMPLES;
-	
+
 	lower_bounds = vector<Scalar>(max_samples);
 	upper_bounds = vector<Scalar>(max_samples);
 	means = vector<Scalar>(max_samples);
-	
+
 	h_low = 12;
-        h_up = 7;
+  h_up = 7;
 	l_low = 30;
 	l_up = 40;
 	s_low = 80;
 	s_up = 80;
 
-	
+
 	namedWindow("Trackbars");
 
 	createTrackbar("H low:", "Trackbars", &h_low, 100, &MyBGSubtractorColor::Trackbar_func);
@@ -52,7 +52,7 @@ void MyBGSubtractorColor::Trackbar_func(int, void*)
 void MyBGSubtractorColor::LearnModel() {
 
 
-	
+
 
 
 	Mat frame, tmp_frame, hls_frame;
@@ -60,7 +60,7 @@ void MyBGSubtractorColor::LearnModel() {
 
 	cap >> frame;
 
-	//almacenamos las posiciones de las esquinas de los cuadrados 
+	//almacenamos las posiciones de las esquinas de los cuadrados
 	Point p;
 	for (int i = 0; i < MAX_HORIZ_SAMPLES; i++) {
 		for (int j = 0; j < MAX_VERT_SAMPLES; j++) {
@@ -73,19 +73,19 @@ void MyBGSubtractorColor::LearnModel() {
 	namedWindow("Cubre los cuadrados con la mano y pulsa espacio");
 
 	for (;;) {
-		
+
 		flip(frame, frame, 1);
-		
+
 		frame.copyTo(tmp_frame);
 
 		//dibujar los cuadrados
-		
+
 		for (int i = 0; i < max_samples; i++) {
 			rectangle(tmp_frame, Rect(samples_positions[i].x, samples_positions[i].y,
 				      SAMPLE_SIZE, SAMPLE_SIZE), Scalar(0, 255, 0), 2);
 		}
-		
-	
+
+
 
 		imshow("Cubre los cuadrados con la mano y pulsa espacio", tmp_frame);
 		char c = cvWaitKey(40);
@@ -96,20 +96,84 @@ void MyBGSubtractorColor::LearnModel() {
 		cap >> frame;
 	}
 
+				cvtColor(frame,hls_frame,CV_BGR2HLS);
+
+				for(int i=0; i<max_samples;i++){
+					Mat roi = hls_frame(Rect(samples_positions[i].x, samples_positions[i].y, SAMPLE_SIZE, SAMPLE_SIZE));
+					Scalar m = mean(roi);
+					means[i] = m;
+				}
+
         // CODIGO 1.1
         // Obtener las regiones de interés y calcular la media de cada una de ellas
         // almacenar las medias en la variable means
         // ...
-	
+
         destroyWindow("Cubre los cuadrados con la mano y pulsa espacio");
 
 }
 void  MyBGSubtractorColor::ObtainBGMask(cv::Mat frame, cv::Mat &bgmask) {
-        
+				Mat acumulado(frame.rows, frame.cols, CV_8UC1, Scalar(0));
+				Mat roi;
+				for(int i=0; i<max_samples;i++){
+
+
+										if (means[i][0] - h_low < 0){
+                        lower_bounds[i][0] = 0;
+                    }
+                    else{
+					              lower_bounds[i][0] = means[i][0] - h_low;
+                    }
+
+										if(means[i][0] + h_up > 255){
+                        upper_bounds[i][0] = 255;
+                    }
+
+										else{
+					    				upper_bounds[i][0] = means[i][0] + h_up;
+                    }
+                    //---------------
+                    if (means[i][1] - l_low < 0){
+                        lower_bounds[i][1] = 0;
+                    }
+                    else{
+					    				lower_bounds[i][1] = means[i][1] - l_low;
+                    }
+
+										if(means[i][1] + l_up > 255){
+                        upper_bounds[i][1] = 255;
+                    }
+                    else{
+					    				upper_bounds[i][1] = means[i][1] + l_up;
+                    }
+
+                    //-------------
+                     if (means[i][2] - s_low < 0){
+                        lower_bounds[i][2] = 0;
+                    }
+                    else{
+					    				lower_bounds[i][2] = means[i][2] - s_low;
+                    }
+
+										if(means[i][2] + s_up > 255){
+                        upper_bounds[i][2] = 255;
+                    }
+                    else{
+					    				upper_bounds[i][2] = means[i][2] + s_up;
+                    }
+				}
+
+
+				for(int i = 0; i < means.size(); i++){
+
+					inRange(frame,lower_bounds[i],upper_bounds[i],roi);
+					acumulado += roi;
+				}
+				acumulado.copyTo(bgmask);
         // CODIGO 1.2
-        // Definir los rangos máximos y mínimos para cada canal (HLS) 
+        // Definir los rangos máximos y mínimos para cada canal (HLS)
         // umbralizar las imágenes para cada rango y sumarlas para
         // obtener la máscara final con el fondo eliminado
         //...
-	
+
 }

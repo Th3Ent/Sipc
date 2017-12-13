@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 {
 
 	Mat frame, bgmask, out_frame;
-	
+
 
 
 	//Abrimos la webcam
@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 	cap.open(0);
 	if (!cap.isOpened())
 	{
-		printf("\nNo se puede abrir la cámara\n");
+		printf("\nNo se puede abrir la cï¿½mara\n");
 		return -1;
 	}
         int cont = 0;
@@ -38,21 +38,22 @@ int main(int argc, char** argv)
                 ++cont;
         }
         if (cont >= 2000) {
-                printf("No se ha podido leer un frame válido\n");
+                printf("No se ha podido leer un frame vï¿½lido\n");
                 exit(-1);
         }
 
-	// Creamos las ventanas que vamos a usar en la aplicación
+	// Creamos las ventanas que vamos a usar en la aplicaciï¿½n
 
 	namedWindow("Reconocimiento");
 	namedWindow("Fondo");
 
-        // creamos el objeto para la substracción de fondo
-	
+        // creamos el objeto para la substracciï¿½n de fondo
+
 	// creamos el objeto para el reconocimiento de gestos
 
-	// iniciamos el proceso de obtención del modelo del fondo
-	
+	// iniciamos el proceso de obtenciï¿½n del modelo del fondo
+	MyBGSubtractorColor BGsubtractor(cap);
+	BGsubtractor.LearnModel();
 
 	for (;;)
 	{
@@ -60,30 +61,37 @@ int main(int argc, char** argv)
 		//flip(frame, frame, 1);
 		if (frame.empty())
 		{
-			printf("Leído frame vacío\n");
+			printf("Leï¿½do frame vacï¿½o\n");
 			continue;
 		}
 		int c = cvWaitKey(40);
 		if ((char)c == 'q') break;
 
-		// obtenemos la máscara del fondo con el frame actual
-                
+		BGsubtractor.ObtainBGMask(frame, bgmask);
+		// obtenemos la mï¿½scara del fondo con el frame actual
+
                 // CODIGO 2.1
-                // limpiar la máscara del fondo de ruido
-                //...
+                // limpiar la mï¿½scara del fondo de ruido
+		//Nos funciona peor						Mat element = getStructuringElement(MORPH_RECT,Size(2*3 +1,2*3+1),Point(3,3));
+		//medianBlur(bgmask,bgmask,3);
+	  dilate(bgmask,bgmask,20);
+		//erode(bgmask,bgmask,element);
+		dilate(bgmask,bgmask,20);
+		medianBlur(bgmask,bgmask,5);
 
+		//HandGesture hand;
+		//hand.FeaturesDetection(bgmask, frame);
+		// deteccion de las caracterï¿½sticas de la mano
 
-		// deteccion de las características de la mano
+                // mostramos el resultado de la sobstracciï¿½n de fondo
 
-                // mostramos el resultado de la sobstracción de fondo
-		
                 // mostramos el resultado del reconocimento de gestos
 
 		imshow("Reconocimiento", frame);
+		imshow("Fondo", bgmask);
 
-		
 	}
-	
+
 	destroyWindow("Reconocimiento");
 	destroyWindow("Fondo");
 	cap.release();
