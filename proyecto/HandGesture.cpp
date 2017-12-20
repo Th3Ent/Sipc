@@ -35,7 +35,7 @@ double HandGesture::getAngle(Point s, Point e, Point f) {
 	return (angle * 180.0/CV_PI);
 }
 void HandGesture::FeaturesDetection(Mat mask, Mat output_img) {
-
+	int contdedos=0;
 	vector<vector<Point> > contours;
 	vector<Point> contoursmax;
 	Mat temp_mask ;
@@ -55,6 +55,8 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img) {
         //...
 				if(contours.size()==0)
 					return;
+
+
 				drawContours(output_img,contours,index,Scalar(255,0,0),2,8,vector<Vec4i>(),0,Point());
 
 	//obtener el convex hull
@@ -74,8 +76,11 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img) {
 	vector<Vec4i> defects;
 	convexityDefects(contours[index], hull, defects);
 
-
-		int cont = 0;
+        double area = contourArea(contoursmax,false);
+	std::ostringstream strs;
+	strs << area;
+	std::string str = strs.str();
+	int cont = 0;
 		for (int i = 0; i < defects.size(); i++) {
 			Point s = contours[index][defects[i][0]];
 			Point e = contours[index][defects[i][1]];
@@ -84,10 +89,41 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img) {
 			double angle = getAngle(s, e, f);
                         // CODIGO 3.2
                         // filtrar y mostrar los defectos de convexidad
-			if(angle < 90){
+			if(depth > 50 && angle < 90){
 				circle(output_img,f,5,Scalar(0,255,0),3);
+				contdedos++;
 			}
     }
+		string result;
+		switch(contdedos){
+			case 1: 
+				result = "DOS dedos levantados";
+				break;
+			case 2: 
+				result = "TRES dedos levantados";
+				break;
+			case 3: 
+				result = "CUATRO dedos levantados";
+				break;
+			case 4: 
+				result = "CINCO dedos levantados";
+				break;
+			case 0: 
+				
+					if( area > 34000  && area < 37000)
+						result = "CERO dedos levantados";
+					else if(area > 31000 && area < 34000)
+						result = "UN dedo levantado";
+					else
+					result = "CERO o UN dedo levantados";
+				break;
+			default:
+				result = "ERROR";
+				break;
+		}
 
+		cv::putText(output_img, result, Point(10, 70), FONT_HERSHEY_SIMPLEX, 1.0,CV_RGB(0, 255, 0), 2);
+
+		rectangle(output_img, boundingRect(contoursmax).tl(), boundingRect(contoursmax).br(), CV_RGB(12, 183, 142), 2, 8, 0);
 
 }

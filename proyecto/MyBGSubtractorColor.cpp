@@ -25,10 +25,10 @@ MyBGSubtractorColor::MyBGSubtractorColor(VideoCapture vc) {
 
 	h_low = 12;
   h_up = 65;
-	l_low = 30;
-	l_up = 40;
-	s_low = 80;
-	s_up = 80;
+	l_low = 100;
+	l_up = 100;
+	s_low = 100;
+	s_up = 100;
 
 
 	namedWindow("Trackbars");

@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
-
+#include <sstream>
 class HandGesture {
 
 public:
