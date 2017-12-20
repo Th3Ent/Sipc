@@ -118,48 +118,48 @@ void  MyBGSubtractorColor::ObtainBGMask(cv::Mat frame, cv::Mat &bgmask) {
 				for(int i=0; i<max_samples;i++){
 
 
-										if (means[i][0] - h_low < 0){
+		    if (means[i][0] - h_low < 0){
                         lower_bounds[i][0] = 0;
                     }
                     else{
-					              lower_bounds[i][0] = means[i][0] - h_low;
+			lower_bounds[i][0] = means[i][0] - h_low;
                     }
 
-										if(means[i][0] + h_up > 255){
+	            if(means[i][0] + h_up > 255){
                         upper_bounds[i][0] = 255;
                     }
 
-										else{
-					    				upper_bounds[i][0] = means[i][0] + h_up;
+		    else{
+			upper_bounds[i][0] = means[i][0] + h_up;
                     }
                     //---------------
                     if (means[i][1] - l_low < 0){
                         lower_bounds[i][1] = 0;
                     }
                     else{
-					    				lower_bounds[i][1] = means[i][1] - l_low;
+		        lower_bounds[i][1] = means[i][1] - l_low;
                     }
 
-										if(means[i][1] + l_up > 255){
+       		    if(means[i][1] + l_up > 255){
                         upper_bounds[i][1] = 255;
                     }
                     else{
-					    				upper_bounds[i][1] = means[i][1] + l_up;
+			upper_bounds[i][1] = means[i][1] + l_up;
                     }
 
                     //-------------
-                     if (means[i][2] - s_low < 0){
+                    if (means[i][2] - s_low < 0){
                         lower_bounds[i][2] = 0;
                     }
                     else{
-					    				lower_bounds[i][2] = means[i][2] - s_low;
+			lower_bounds[i][2] = means[i][2] - s_low;
                     }
 
-										if(means[i][2] + s_up > 255){
+		    if(means[i][2] + s_up > 255){
                         upper_bounds[i][2] = 255;
                     }
                     else{
-					    				upper_bounds[i][2] = means[i][2] + s_up;
+			upper_bounds[i][2] = means[i][2] + s_up;
                     }
 				}
 
